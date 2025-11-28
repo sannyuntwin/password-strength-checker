@@ -7,7 +7,7 @@
   <img src="https://img.shields.io/badge/License-MIT-blue" />
   <img src="https://img.shields.io/badge/SaaS-Ready-orange" />
 </p>
-A professional, modern, SaaS-grade **Password Strength Checker** built with **Next.js**, **Node.js (Express)**, **Zxcvbn**, and a clean UI powered by **TailwindCSS**, **ShadCN/UI**, and **Framer Motion**.
+A professional, modern, SaaS-grade **Password Strength Checker** built with **Next.js**, **FastAPI (Python)**, **Zxcvbn**, and a clean UI powered by **TailwindCSS**, **ShadCN/UI**, and **Framer Motion**.
 
 This project is designed for beginners entering cybersecurity who want a real, deployable, portfolio-ready project that looks professional and showcases full‑stack skills.
 
