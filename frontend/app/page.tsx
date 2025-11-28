@@ -39,11 +39,11 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const API_URL = "https://YOUR-RENDER-API-URL.onrender.com/check-password";
+  // Correct API URL with endpoint
+  const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/check_password`;
 
   async function checkPassword() {
     if (!password) return;
-
     setLoading(true);
 
     try {
@@ -52,6 +52,10 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
       });
+
+      if (!res.ok) {
+        throw new Error("API Error: " + res.status);
+      }
 
       const data = await res.json();
       setResult(data);
@@ -65,7 +69,7 @@ export default function Home() {
   const getStrengthIcon = () => {
     if (!result) return null;
     const strength = result.strength?.toLowerCase();
-    
+
     if (strength === "very strong" || strength === "strong") {
       return <CheckCircle2 className="w-6 h-6 text-emerald-400" />;
     } else if (strength === "moderate") {
@@ -77,10 +81,10 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-black flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated background grid */}
+      {/* Background grid */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,0,0.03)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]" />
-      
-      {/* Glow effects */}
+
+      {/* Lights */}
       <div className="absolute top-20 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
 
@@ -96,9 +100,9 @@ export default function Home() {
           <p className="text-gray-400 text-sm tracking-wider uppercase">Password Strength Assessment</p>
         </div>
 
-        {/* Main Card */}
+        {/* Card */}
         <div className="bg-gradient-to-b from-gray-900/90 to-black/90 backdrop-blur-xl rounded-2xl border border-emerald-500/20 shadow-2xl shadow-emerald-500/5 p-8">
-          {/* Input Section */}
+          {/* Input */}
           <div className="space-y-4">
             <label className="block text-emerald-400 text-sm font-medium uppercase tracking-wider">
               Enter Password
@@ -139,12 +143,12 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Results Section */}
+          {/* Results */}
           {result && (
             <div className="mt-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
 
-              {/* Strength Display */}
+              {/* Strength */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   {getStrengthIcon()}
@@ -153,16 +157,19 @@ export default function Home() {
                     <p className="text-2xl font-bold text-emerald-400">{result.strength}</p>
                   </div>
                 </div>
+
                 <div className="text-right">
                   <p className="text-gray-400 text-xs uppercase tracking-wider">Entropy</p>
-                  <p className="text-2xl font-bold text-cyan-400">{result.entropy_bits} <span className="text-sm text-gray-500">bits</span></p>
+                  <p className="text-2xl font-bold text-cyan-400">
+                    {result.entropy_bits} <span className="text-sm text-gray-500">bits</span>
+                  </p>
                 </div>
               </div>
 
               <StrengthBar strength={result.strength} />
 
-              {/* Suggestions */}
-              {result.suggestions && result.suggestions.length > 0 && (
+              {/* Feedback */}
+              {result.feedback && result.feedback.length > 0 && (
                 <div className="bg-black/30 border border-yellow-500/20 rounded-lg p-5">
                   <div className="flex items-center gap-2 mb-3">
                     <AlertTriangle className="w-5 h-5 text-yellow-400" />
@@ -170,8 +177,9 @@ export default function Home() {
                       Security Recommendations
                     </h3>
                   </div>
+
                   <ul className="space-y-2">
-                    {result.suggestions.map((s: string, i: number) => (
+                    {result.feedback.map((s: string, i: number) => (
                       <li key={i} className="text-gray-300 text-sm flex items-start gap-2">
                         <span className="text-yellow-400 mt-1">▸</span>
                         <span>{s}</span>

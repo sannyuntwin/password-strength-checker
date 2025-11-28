@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import math
 
@@ -8,9 +9,28 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# ---- CORS Configuration (FIXED) ----
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://*.vercel.app",  # For production
+        "*"  # Allow all origins as fallback
+    ],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+    expose_headers=["*"]
+)
+
 # ---- Load dictionary words ----
-with open("dictionary.txt", "r", encoding="utf-8") as file:
-    dictionary_words = set(word.strip().lower() for word in file.readlines())
+try:
+    with open("dictionary.txt", "r", encoding="utf-8") as file:
+        dictionary_words = set(word.strip().lower() for word in file.readlines())
+except FileNotFoundError:
+    dictionary_words = set()  # Handle missing file gracefully
+    print("Warning: dictionary.txt not found")
 
 common_passwords = {
     "123456", "password", "123456789", "12345", "12345678", "qwerty",
@@ -105,12 +125,23 @@ def analyze_password(password: str):
         "feedback": feedback
     }
 
-# ---- API Endpoint ----
+# ---- API Endpoints ----
+@app.get("/", summary="API Root")
+async def root():
+    return {
+        "message": "Welcome to the Password Strength Checker API",
+        "endpoints": {
+            "/check_password": "POST - Evaluate password strength",
+            "/docs": "GET - API documentation"
+        }
+    }
+
 @app.post("/check_password", summary="Check Password Strength")
 async def check_password(request: PasswordRequest):
     result = analyze_password(request.password) 
     return result
 
-@app.get("/", summary="API Root")
-async def root():
-    return {"message": "Welcome to the Password Strength Checker API. Use the /check_password endpoint to evaluate password strength."}
+# Add a health check endpoint
+@app.get("/health", summary="Health Check")
+async def health():
+    return {"status": "healthy"}
